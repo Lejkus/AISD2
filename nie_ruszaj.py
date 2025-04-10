@@ -194,9 +194,16 @@ def sortedArrayToAVL(arr):
     root.left = sortedArrayToAVL(arr[:mid])
     root.right = sortedArrayToAVL(arr[mid+1:])
     root.height = 1 + max(getHeight(root.left), getHeight(root.right))
-
     return root
+def export(node):
+    if not node.left and not node.right:
+        return f"node {node.data}"
+    l_str = f"child {{{export(node.left)}}}" if node.left else "child[missing]"
+    r_str = f"child {{{export(node.right)}}}" if node.right else "child[missing]"
+    return f"node {node.data} {{{l_str} {r_str}}}"
 
+def main(tree_root):
+    return f"\\{export(tree_root)};"
 def getHelp():
     print("Print - wypisuje drzewo używając in-order, post-order, pre-order\n")
     print("MinAndMax - wypisuje minimun i maximum w drzewie\n")
@@ -247,7 +254,7 @@ if __name__ == "__main__":
                 val = int(input("Podaj wartość do usunięcia: "))
                 root = deleteNode(root, val)
             case "export":
-                print("XD")
+                print(main(root))
             case "rebalance":
                 if root:
                     root = balanceDSW(root)
