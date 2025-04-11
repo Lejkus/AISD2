@@ -10,9 +10,11 @@ def getHeight(node):
     return node.height if node else 0
 
 def getBalance(node):
+    # róznica lewego - prawy potomek
     return getHeight(node.left) - getHeight(node.right) if node else 0
 
 # ------------------- Rotacje AVL -------------------
+# https://www.w3schools.com/dsa/dsa_data_avltrees.php LL
 def rightRotate(y):
     x = y.left
     T2 = x.right
@@ -49,13 +51,17 @@ def insert(root, key):
     root.height = 1 + max(getHeight(root.left), getHeight(root.right))
     balance = getBalance(root)
 
+    # lewo-lewo (LL)
     if balance > 1 and key < root.left.data:
         return rightRotate(root)
+    # prawo-prawo (RR) 
     if balance < -1 and key > root.right.data:
         return leftRotate(root)
+    # lewo-prawo (LR) 
     if balance > 1 and key > root.left.data:
         root.left = leftRotate(root.left)
         return rightRotate(root)
+    # prawo-lewo (RL)
     if balance < -1 and key < root.right.data:
         root.right = rightRotate(root.right)
         return leftRotate(root)
@@ -76,18 +82,21 @@ def sortedArrayToAVL(arr):
     return root
 
 # ------------------- Traversale -------------------
+# lewa -> korzeń -> prawa
 def inOrderTraversal(node):
     if node:
         inOrderTraversal(node.left)
         print(node.data, end=", ")
         inOrderTraversal(node.right)
 
+# korzeń -> lewa -> prawa
 def preOrderTraversal(node):
     if node:
         print(node.data, end=", ")
         preOrderTraversal(node.left)
         preOrderTraversal(node.right)
 
+# lewa -> prawa -> korzeń
 def postOrderTraversal(node):
     if node:
         postOrderTraversal(node.left)
@@ -152,7 +161,7 @@ def deleteTreePostOrder(node):
     if node:
         node.left = deleteTreePostOrder(node.left)
         node.right = deleteTreePostOrder(node.right)
-        print(f"Usuwam: {node.data}")
+        print(f"usuwam: {node.data}")
         node = None
     return node
 
@@ -227,7 +236,11 @@ if __name__ == "__main__":
         match choice:
             case "1":
                 val = int(input("Podaj wartość do wstawienia: "))
-                root = insert(root, val)
+                numbers_to_insert = [2, 5, 10, 12, 13, 6, 9]
+                root = None
+                for num in numbers_to_insert:
+                    root = insert(root, num)
+                #root = insert(root, val)
             case "2":
                 val = int(input("Podaj wartość do usunięcia: "))
                 root = deleteNode(root, val)
