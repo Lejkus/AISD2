@@ -1,0 +1,10 @@
+filename,BST_sequential_build
+a_shaped_array_00000004.txt,0.002
+a_shaped_array_00000008.txt,0.003
+a_shaped_array_00000016.txt,0.005
+a_shaped_array_00000032.txt,0.015
+a_shaped_array_00000064.txt,0.043
+a_shaped_array_00000128.txt,0.144
+a_shaped_array_00000256.txt,0.61
+a_shaped_array_00000512.txt,2.423
+a_shaped_array_00001024.txt,10.299

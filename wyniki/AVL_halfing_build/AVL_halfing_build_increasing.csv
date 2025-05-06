@@ -1,0 +1,9 @@
+filename,AVL_halfing_build
+increasing_array_00000004.txt,0.003
+increasing_array_00000008.txt,0.004
+increasing_array_00000016.txt,0.006
+increasing_array_00000032.txt,0.01
+increasing_array_00000064.txt,0.018
+increasing_array_00000128.txt,0.037
+increasing_array_00000256.txt,0.066
+increasing_array_00000512.txt,0.121

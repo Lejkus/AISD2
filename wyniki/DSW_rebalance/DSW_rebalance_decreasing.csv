@@ -1,0 +1,9 @@
+filename,DSW_rebalance
+decreasing_array_00000004.txt,0.004
+decreasing_array_00000008.txt,0.004
+decreasing_array_00000016.txt,0.006
+decreasing_array_00000032.txt,0.009
+decreasing_array_00000064.txt,0.016
+decreasing_array_00000128.txt,0.032
+decreasing_array_00000256.txt,0.063
+decreasing_array_00000512.txt,0.129

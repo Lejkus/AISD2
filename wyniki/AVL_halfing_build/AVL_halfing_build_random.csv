@@ -1,0 +1,16 @@
+filename,AVL_halfing_build
+random_array_00000004.txt,0.004
+random_array_00000008.txt,0.004
+random_array_00000016.txt,0.007
+random_array_00000032.txt,0.012
+random_array_00000064.txt,0.023
+random_array_00000128.txt,0.043
+random_array_00000256.txt,0.077
+random_array_00000512.txt,0.156
+random_array_00001024.txt,0.282
+random_array_00002048.txt,0.647
+random_array_00004096.txt,1.403
+random_array_00008192.txt,2.725
+random_array_00016384.txt,6.016
+random_array_00032768.txt,13.982
+random_array_00065536.txt,25.886

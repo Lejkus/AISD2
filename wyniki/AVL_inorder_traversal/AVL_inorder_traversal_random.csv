@@ -1,0 +1,16 @@
+filename,AVL_inorder_traversal
+random_array_00000004.txt,0.001
+random_array_00000008.txt,0.001
+random_array_00000016.txt,0.002
+random_array_00000032.txt,0.003
+random_array_00000064.txt,0.004
+random_array_00000128.txt,0.007
+random_array_00000256.txt,0.014
+random_array_00000512.txt,0.027
+random_array_00001024.txt,0.054
+random_array_00002048.txt,0.105
+random_array_00004096.txt,0.203
+random_array_00008192.txt,0.401
+random_array_00016384.txt,0.837
+random_array_00032768.txt,1.878
+random_array_00065536.txt,3.515

@@ -1,0 +1,16 @@
+filename,DSW_rebalance
+random_array_00000004.txt,0.005
+random_array_00000008.txt,0.004
+random_array_00000016.txt,0.008
+random_array_00000032.txt,0.011
+random_array_00000064.txt,0.019
+random_array_00000128.txt,0.042
+random_array_00000256.txt,0.065
+random_array_00000512.txt,0.129
+random_array_00001024.txt,0.313
+random_array_00002048.txt,0.519
+random_array_00004096.txt,1.058
+random_array_00008192.txt,2.111
+random_array_00016384.txt,4.237
+random_array_00032768.txt,8.337
+random_array_00065536.txt,18.029
