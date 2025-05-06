@@ -179,49 +179,62 @@ def measure_time(func, *args, **kwargs):
     end = time.perf_counter()
     return result, round(end - start, 6)
 
-def perform_measurements_for_file(filepath: str):
+def extract_length_from_filename(filename: str) -> int:
+    """Wyciąga liczbę z nazwy pliku np. 'constant_array_00000004.txt' -> 4"""
+    base_name = filename.split('_')[-1].split('.')[0]  # np. '00000004'
+    return int(base_name)  # Zwraca liczbę (np. 4)
+
+
+def perform_measurements_for_file(filepath: str, metric: str):
     data = read_numbers_from_file(filepath)
-    result = {'filename': os.path.basename(filepath)}
+    length = extract_length_from_filename(os.path.basename(filepath))  # np. 512
+    result = {'length': length}
 
-    # (a) AVL z połowienia
-    _, t_avl = measure_time(lambda: sortedArrayToAVL(sorted(data)))
-    result['AVL_halfing_build'] = t_avl
+    def ms(t): return round(t * 1000, 3)  # sekundy → milisekundy
 
-    # (b) BST degenerowane (kolejno)
-    bst_root = None
-    def build_bst():
-        nonlocal bst_root
+    if metric == "AVL_halfing_build":
+        _, t = measure_time(lambda: sortedArrayToAVL(sorted(data)))
+    elif metric == "BST_sequential_build":
+        bst_root = None
+        def build_bst():
+            nonlocal bst_root
+            bst_root = None
+            for num in data:
+                bst_root = insertBST(bst_root, num)
+        _, t = measure_time(build_bst)
+    elif metric == "BST_find_min":
         bst_root = None
         for num in data:
             bst_root = insertBST(bst_root, num)
-    _, t_bst = measure_time(build_bst)
-    result['BST_sequential_build'] = t_bst
+        _, t = measure_time(findMin, bst_root)
+    elif metric == "BST_find_max":
+        bst_root = None
+        for num in data:
+            bst_root = insertBST(bst_root, num)
+        _, t = measure_time(findMax, bst_root)
+    elif metric == "AVL_find_min":
+        avl_root = sortedArrayToAVL(sorted(data))
+        _, t = measure_time(findMinAVL, avl_root)
+    elif metric == "AVL_find_max":
+        avl_root = sortedArrayToAVL(sorted(data))
+        _, t = measure_time(findMaxAVL, avl_root)
+    elif metric == "BST_inorder_traversal":
+        bst_root = None
+        for num in data:
+            bst_root = insertBST(bst_root, num)
+        _, t = measure_time(lambda: in_order_collect(bst_root, []))
+    elif metric == "AVL_inorder_traversal":
+        avl_root = sortedArrayToAVL(sorted(data))
+        _, t = measure_time(lambda: in_order_collect(avl_root, []))
+    elif metric == "DSW_rebalance":
+        bst_root = None
+        for num in data:
+            bst_root = insertBST(bst_root, num)
+        _, t = measure_time(lambda: balanceDSW(bst_root))
+    else:
+        raise ValueError(f"Nieznana metryka: {metric}")
 
-    # (c) Min & Max dla BST
-    _, t_bst_min = measure_time(findMin, bst_root)
-    _, t_bst_max = measure_time(findMax, bst_root)
-    result['BST_find_min'] = t_bst_min
-    result['BST_find_max'] = t_bst_max
-
-    # (d) Min & Max dla AVL
-    avl_root = sortedArrayToAVL(sorted(data))
-    _, t_avl_min = measure_time(findMinAVL, avl_root)
-    _, t_avl_max = measure_time(findMaxAVL, avl_root)
-    result['AVL_find_min'] = t_avl_min
-    result['AVL_find_max'] = t_avl_max
-
-    # (e) In-order dla BST
-    _, t_bst_inorder = measure_time(lambda: in_order_collect(bst_root, []))
-    result['BST_inorder_traversal'] = t_bst_inorder
-
-    # (f) In-order dla AVL
-    _, t_avl_inorder = measure_time(lambda: in_order_collect(avl_root, []))
-    result['AVL_inorder_traversal'] = t_avl_inorder
-
-    # (g) DSW balance dla BST
-    _, t_dsw = measure_time(lambda: balanceDSW(bst_root))
-    result['DSW_rebalance'] = t_dsw
-
+    result['time'] = ms(t)
     return result
 
 
@@ -234,10 +247,10 @@ def process_metric_for_all_folders(base_folder: str, metric: str, output_folder:
             if filename.endswith(".txt"):
                 filepath = os.path.join(sub_path, filename)
                 try:
-                    full_result = perform_measurements_for_file(filepath)
+                    full_result = perform_measurements_for_file(filepath, metric)
                     results.append({
-                        'filename': filename,
-                        metric: full_result[metric]
+                        'length': full_result['length'],
+                        'time': full_result['time']
                     })
                     print(f"{metric} - {sub}/{filename}")
                 except Exception as e:
@@ -245,12 +258,9 @@ def process_metric_for_all_folders(base_folder: str, metric: str, output_folder:
 
         out_path = os.path.join(output_folder, f"{metric}_{sub}.csv")
         with open(out_path, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['filename', metric])
+            writer = csv.DictWriter(f, fieldnames=['length', 'time'])
             writer.writeheader()
             for result in results:
-                for k, v in result.items():
-                    if isinstance(v, float):
-                        result[k] = round(v * 1000, 3)  # konwersja sekund → milisekundy
                 writer.writerow(result)
 
 
