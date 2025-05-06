@@ -2,14 +2,8 @@ import os
 import time
 import csv
 from typing import List
-import sys
-sys.setrecursionlimit(40000)
-import re
 
-# --- Algorytmy i struktury drzew ---
-def extract_number(filename):
-    match = re.search(r'_(\d+)\.txt$', filename)
-    return int(match.group(1)) if match else float('inf')
+# --- Struktury drzew i funkcje pomocnicze (identyczne jak wcześniej) ---
 
 class Node:
     def __init__(self, data):
@@ -91,6 +85,20 @@ def findMax(node):
         current = current.right
     return current.data if current else None
 
+def findMinAVL(node):
+    # Minimalna wartość w AVL (po prostu jak w BST)
+    current = node
+    while current.left:
+        current = current.left
+    return current.data if current else None
+
+def findMaxAVL(node):
+    # Maksymalna wartość w AVL (po prostu jak w BST)
+    current = node
+    while current and current.right:
+        current = current.right
+    return current.data if current else None
+
 def in_order_collect(node, result):
     if node:
         in_order_collect(node.left, result)
@@ -159,7 +167,7 @@ def sortedArrayToAVL(arr):
     root.height = 1 + max(getHeight(root.left), getHeight(root.right))
     return root
 
-# --- Pomiar czasu ---
+# --- Pomiar ---
 
 def read_numbers_from_file(file_path: str) -> List[int]:
     with open(file_path, 'r') as f:
@@ -169,8 +177,7 @@ def measure_time(func, *args, **kwargs):
     start = time.perf_counter()
     result = func(*args, **kwargs)
     end = time.perf_counter()
-    return result, round((end - start) * 1000, 3)  # Mnożymy przez 1000, żeby otrzymać czas w milisekundach
-
+    return result, round(end - start, 6)
 
 def perform_measurements_for_file(filepath: str):
     data = read_numbers_from_file(filepath)
@@ -178,7 +185,7 @@ def perform_measurements_for_file(filepath: str):
 
     # (a) AVL z połowienia
     _, t_avl = measure_time(lambda: sortedArrayToAVL(sorted(data)))
-    result['AVL_halfing_build'] = round(t_avl, 3)  # Zapisz do 3 miejsc po przecinku
+    result['AVL_halfing_build'] = t_avl
 
     # (b) BST degenerowane (kolejno)
     bst_root = None
@@ -188,46 +195,70 @@ def perform_measurements_for_file(filepath: str):
         for num in data:
             bst_root = insertBST(bst_root, num)
     _, t_bst = measure_time(build_bst)
-    result['BST_sequential_build'] = round(t_bst, 3)  # Zapisz do 3 miejsc po przecinku
+    result['BST_sequential_build'] = t_bst
 
-    # (c) min & max
-    _, t_min = measure_time(findMin, bst_root)
-    _, t_max = measure_time(findMax, bst_root)
-    result['Find_min'] = round(t_min, 3)  # Zapisz do 3 miejsc po przecinku
-    result['Find_max'] = round(t_max, 3)  # Zapisz do 3 miejsc po przecinku
+    # (c) Min & Max dla BST
+    _, t_bst_min = measure_time(findMin, bst_root)
+    _, t_bst_max = measure_time(findMax, bst_root)
+    result['BST_find_min'] = t_bst_min
+    result['BST_find_max'] = t_bst_max
 
-    # (d) in-order
-    _, t_inorder = measure_time(lambda: in_order_collect(bst_root, []))
-    result['Inorder_traversal'] = round(t_inorder, 3)  # Zapisz do 3 miejsc po przecinku
+    # (d) Min & Max dla AVL
+    avl_root = sortedArrayToAVL(sorted(data))
+    _, t_avl_min = measure_time(findMinAVL, avl_root)
+    _, t_avl_max = measure_time(findMaxAVL, avl_root)
+    result['AVL_find_min'] = t_avl_min
+    result['AVL_find_max'] = t_avl_max
 
-    # (e) DSW balance
+    # (e) In-order dla BST
+    _, t_bst_inorder = measure_time(lambda: in_order_collect(bst_root, []))
+    result['BST_inorder_traversal'] = t_bst_inorder
+
+    # (f) In-order dla AVL
+    _, t_avl_inorder = measure_time(lambda: in_order_collect(avl_root, []))
+    result['AVL_inorder_traversal'] = t_avl_inorder
+
+    # (g) DSW balance dla BST
     _, t_dsw = measure_time(lambda: balanceDSW(bst_root))
-    result['DSW_rebalance'] = round(t_dsw, 3)  # Zapisz do 3 miejsc po przecinku
+    result['DSW_rebalance'] = t_dsw
 
     return result
 
 
-def process_all_files_in_folder(folder_path: str, output_csv: str):
-    all_results = []
-    for filename in sorted(os.listdir(folder_path), key=extract_number):
+def process_metric_for_all_folders(base_folder: str, metric: str, output_folder: str):
+    subfolders = [f.name for f in os.scandir(base_folder) if f.is_dir()]
+    for sub in subfolders:
+        results = []
+        sub_path = os.path.join(base_folder, sub)
+        for filename in sorted(os.listdir(sub_path)):
+            if filename.endswith(".txt"):
+                filepath = os.path.join(sub_path, filename)
+                try:
+                    full_result = perform_measurements_for_file(filepath)
+                    results.append({
+                        'filename': filename,
+                        metric: full_result[metric]
+                    })
+                    print(f"{metric} - {sub}/{filename}")
+                except Exception as e:
+                    print(f"Błąd w {filename}: {e}")
 
-        if filename.endswith('.txt'):
-            full_path = os.path.join(folder_path, filename)
-            try:
-                result = perform_measurements_for_file(full_path)
-                all_results.append(result)
-                print(f"Przetworzono: {filename}")
-            except Exception as e:
-                print(f"Błąd przy przetwarzaniu {filename}: {e}")
-
-    if all_results:
-        keys = all_results[0].keys()
-        with open(output_csv, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=keys)
+        out_path = os.path.join(output_folder, f"{metric}_{sub}.csv")
+        with open(out_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['filename', metric])
             writer.writeheader()
-            writer.writerows(all_results)
+            for result in results:
+                for k, v in result.items():
+                    if isinstance(v, float):
+                        result[k] = round(v * 1000, 3)  # konwersja sekund → milisekundy
+                writer.writerow(result)
+
+
+# --- Uruchomienie ---
 
 if __name__ == "__main__":
-    folder = input("Podaj ścieżkę do folderu z plikami .txt: ")
-    output = input("Podaj nazwę pliku wyjściowego CSV: ")
-    process_all_files_in_folder(folder,output)
+    base = input("Podaj ścieżkę do folderu bazowego z danymi: ")
+    metric = input("Podaj nazwę metryki (np. AVL_halfing_build): ")
+    output = input("Podaj ścieżkę do folderu wyjściowego: ")
+    os.makedirs(output, exist_ok=True)
+    process_metric_for_all_folders(base, metric, output)
