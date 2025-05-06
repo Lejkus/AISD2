@@ -78,7 +78,6 @@ def sortedArrayToAVL(arr):
     root.left = sortedArrayToAVL(arr[:mid])
     root.right = sortedArrayToAVL(arr[mid+1:])
     root.height = 1 + max(getHeight(root.left), getHeight(root.right))
-
     return root
 
 # ------------------- Traversale -------------------
